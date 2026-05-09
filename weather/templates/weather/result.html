@@ -1,0 +1,143 @@
+{% extends 'weather/base.html' %}
+{% block title %}Погода — {{ weather.city }}{% endblock %}
+{% block body %}
+
+<div class="row justify-content-center g-4">
+
+  <!-- Ліва колонка: погода -->
+  <div class="col-lg-7">
+
+    <!-- Головна картка погоди -->
+    <div class="weather-card card shadow mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <h2 class="fw-bold mb-0">{{ weather.city }}
+              {% if country %}<span class="fs-5 text-muted">, {{ country.name }}</span>{% endif %}
+            </h2>
+            <p class="text-muted mb-0">{{ weather.description }}</p>
+          </div>
+          <div class="text-center">
+            <img src="{{ weather.icon_url }}" alt="{{ weather.description }}"
+                 class="weather-icon" width="80">
+            <div class="temp-main">{{ weather.temp }}°C</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Обрані показники -->
+    {% if display_fields %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-transparent fw-semibold">
+        <i class="bi bi-bar-chart me-1"></i>Деталі погоди
+      </div>
+      <div class="card-body p-3">
+        <div class="row g-3">
+          {% for field in display_fields %}
+          <div class="col-6 col-md-4">
+            <div class="stat-card text-center p-3 rounded-3">
+              <div class="stat-icon">{{ field.icon }}</div>
+              <div class="stat-value">{{ field.value }}</div>
+              <div class="stat-label">{{ field.label }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle me-1"></i>
+      Не обрано жодного поля для відображення.
+    </div>
+    {% endif %}
+
+    <!-- Нова форма пошуку -->
+    <div class="card shadow-sm">
+      <div class="card-body p-3">
+        <form action="{% url 'weather:result' %}" method="POST" class="row g-2 align-items-end">
+          {% csrf_token %}
+          <!-- Зберігаємо вибрані поля -->
+          {% for field in display_fields %}
+            {% for f in form.fields.choices %}
+              {% if field.label == f.1 %}
+                <input type="hidden" name="fields" value="{{ f.0 }}">
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+          <div class="col">
+            <input type="text" name="city" class="form-control"
+                   placeholder="Інше місто..." value="{{ weather.city }}">
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+          <div class="col-auto">
+            <a href="{% url 'weather:index' %}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left me-1"></i>Назад
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Права колонка: інфо про країну -->
+  {% if country %}
+  <div class="col-lg-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-transparent fw-semibold">
+        <i class="bi bi-globe2 me-1"></i>Інформація про країну
+      </div>
+      <div class="card-body p-3">
+
+        {% if country.flag_url %}
+        <img src="{{ country.flag_url }}" alt="Прапор {{ country.name }}"
+             class="flag-img mb-3">
+        {% endif %}
+
+        <table class="table table-sm table-borderless mb-3">
+          <tbody>
+            <tr>
+              <td class="text-muted small">Країна</td>
+              <td class="fw-semibold">{{ country.name }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted small">Столиця</td>
+              <td>{{ country.capital }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted small">Населення</td>
+              <td>{{ country.population }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted small">Континент</td>
+              <td>{{ country.region }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted small">Регіон</td>
+              <td>{{ country.subregion }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Google Maps посилання -->
+        {% if country.maps_url != '#' %}
+        <a href="{{ country.maps_url }}" target="_blank" rel="noopener"
+           class="btn btn-outline-success w-100">
+          <i class="bi bi-map me-2"></i>Столиця на Google Maps
+        </a>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
