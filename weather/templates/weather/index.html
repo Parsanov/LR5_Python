@@ -15,7 +15,6 @@
         <form action="{% url 'weather:result' %}" method="POST">
           {% csrf_token %}
 
-          <!-- Поле міста -->
           <div class="mb-4">
             <label for="{{ form.city.id_for_label }}" class="form-label fw-semibold">
               <i class="bi bi-geo-alt me-1"></i>Місто
@@ -29,7 +28,6 @@
             {% endif %}
           </div>
 
-          <!-- Checkboxes -->
           <div class="mb-4">
             <label class="form-label fw-semibold">
               <i class="bi bi-sliders me-1"></i>Показати дані
